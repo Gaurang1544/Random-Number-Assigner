@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Random Number Assigner</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f7ff;
+      --surface: #ffffff;
+      --surface2: #f0f2fb;
+      --accent: #6355d8;
+      --accent2: #0ea882;
+      --accent-soft: rgba(99,85,216,0.08);
+      --text: #1a1d2e;
+      --muted: #7a7f9a;
+      --border: #e2e5f0;
+      --border-focus: rgba(99,85,216,0.4);
+      --error: #dc3545;
+      --shadow-sm: 0 1px 4px rgba(99,85,216,0.07), 0 2px 12px rgba(99,85,216,0.06);
+      --shadow-md: 0 4px 24px rgba(99,85,216,0.1), 0 1px 4px rgba(0,0,0,0.04);
+      --radius: 14px;
+      /* gaurang special */
+      --gaurang: #e05c00;
+      --gaurang-bg: rgba(224,92,0,0.08);
+      --gaurang-border: rgba(224,92,0,0.3);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 48px 16px 80px;
+      color: var(--text);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 55% 45% at 10% 5%, rgba(99,85,216,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 35% at 90% 90%, rgba(14,168,130,0.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .header .icon {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, var(--accent), #9c8ef5);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      margin: 0 auto 16px;
+      box-shadow: 0 8px 24px rgba(99,85,216,0.25);
+    }
+
+    .header h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header p {
+      margin-top: 7px;
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 26px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .card:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: var(--shadow-md);
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .count-pill {
+      background: var(--surface2);
+      border-radius: 999px;
+      padding: 2px 9px;
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 700;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 15px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.93rem;
+      color: var(--text);
+      resize: vertical;
+      min-height: 140px;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.2s;
+      line-height: 1.75;
+    }
+
+    textarea::placeholder { color: #bbbdd0; }
+
+    textarea:focus {
+      border-color: var(--accent);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(99,85,216,0.1);
+    }
+
+    /* ── Sort options ── */
+    .options {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .options-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 500;
+      margin-right: 2px;
+    }
+
+    .option-btn {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 13px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .option-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .option-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+      font-weight: 600;
+    }
+
+    /* ── Assign Button ── */
+    button.assign-btn {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--accent) 0%, #8b7af0 50%, var(--accent2) 100%);
+      background-size: 200% 200%;
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.97rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.25s, background-position 0.5s;
+      box-shadow: 0 4px 16px rgba(99,85,216,0.3);
+      font-family: 'Inter', sans-serif;
+    }
+
+    button.assign-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 7px 24px rgba(99,85,216,0.38);
+      background-position: right center;
+    }
+
+    button.assign-btn:active { transform: translateY(0px); }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: scale(0);
+      animation: ripple 0.6s linear;
+      pointer-events: none;
+    }
+
+    @keyframes ripple {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    .btn-inner {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    /* ── Error ── */
+    .error-msg {
+      margin-top: 10px;
+      color: var(--error);
+      font-size: 0.83rem;
+      display: flex; align-items: center; gap: 6px;
+      animation: fadeIn 0.25s ease;
+    }
+
+
+
+    /* ── Results card ── */
+    .results-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+
+    .results-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: var(--surface);
+    }
+
+    .results-header h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex; align-items: center; gap: 7px;
+    }
+
+    .stat-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 11px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent2);
+    }
+
+    .shuffle-btn {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.18s;
+      display: flex; align-items: center; gap: 5px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .shuffle-btn:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: rgba(14,168,130,0.06);
+    }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      padding: 9px 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-align: left;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    thead th:last-child { text-align: center; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      animation: rowIn 0.32s ease both;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(99,85,216,0.03); }
+
+    @keyframes rowIn {
+      from { opacity: 0; transform: translateX(-6px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    tbody td {
+      padding: 12px 20px;
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+
+    .row-num {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .name-cell { font-weight: 500; }
+
+    td:last-child { text-align: center; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.93rem;
+      transition: transform 0.2s;
+      cursor: default;
+    }
+
+    .badge:hover { transform: scale(1.1); }
+
+    .badge.spinning { animation: spin 0.35s linear infinite; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Normal colour tiers (light-friendly) */
+    .badge.tier-1 { background: rgba(99,85,216,0.1);  color: #5447bb; border: 1px solid rgba(99,85,216,0.25); }
+    .badge.tier-2 { background: rgba(14,168,130,0.1); color: #0a8a6a; border: 1px solid rgba(14,168,130,0.25); }
+    .badge.tier-3 { background: rgba(234,169,0,0.12); color: #9a6e00; border: 1px solid rgba(234,169,0,0.3); }
+    .badge.tier-4 { background: rgba(220,53,69,0.1);  color: #b02233; border: 1px solid rgba(220,53,69,0.25); }
+    .badge.tier-5 { background: rgba(13,110,253,0.1); color: #0a56c7; border: 1px solid rgba(13,110,253,0.25); }
+
+    /* Gaurang badge — always warm orange */
+    .badge.gaurang-badge {
+      background: rgba(224,92,0,0.12);
+      color: var(--gaurang);
+      border: 1.5px solid var(--gaurang-border);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="icon">🎲</div>
+    <h1>Random Number Assigner</h1>
+    <p>Enter names (one per line). Each gets a unique random number from 1 to N.</p>
+  </div>
+
+  <div class="card">
+    <label for="namesInput">
+      Names
+      <span class="count-pill" id="countPill">0 names</span>
+    </label>
+    <textarea id="namesInput"
+      placeholder="Alice&#10;Bob&#10;Gaurang&#10;Diana&#10;Eve"
+      spellcheck="false"></textarea>
+
+    <div class="options">
+      <span class="options-label">Sort by:</span>
+      <button class="option-btn active" id="sortName" onclick="setSortMode('name')">Name</button>
+      <button class="option-btn" id="sortNum"  onclick="setSortMode('number')">Number</button>
+      <button class="option-btn" id="sortOrig" onclick="setSortMode('original')">Original</button>
+    </div>
+  </div>
+
+  <button class="assign-btn" onclick="assignNumbers(event)">
+    <span class="btn-inner">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
+        <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
+      </svg>
+      Shuffle &amp; Assign
+    </span>
+  </button>
+
+  <p class="error-msg" id="errorMsg" style="display:none;"></p>
+
+  <div id="resultsSection" style="display:none; margin-top:22px;">
+    <div class="results-card">
+      <div class="results-header">
+        <h2>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)"
+               stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <span id="resultTitle"></span>
+        </h2>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span class="stat-chip" id="statChip"></span>
+          <button class="shuffle-btn" onclick="reshuffleOnly()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+              <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+            </svg>
+            Reshuffle
+          </button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:48px;">#</th>
+              <th>Name</th>
+              <th style="width:100px;">Number</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+  // ── State ────────────────────────────────────────────────
+  let lastNames      = [];
+  let lastAssignment = [];   // [{name, number, origIndex, isGaurang}]
+  let sortMode       = 'name';
+
+  // ── Live counter ─────────────────────────────────────────
+  document.getElementById('namesInput').addEventListener('input', () => {
+    const names = parseNames();
+    const pill  = document.getElementById('countPill');
+    pill.textContent = names.length === 1 ? '1 name' : `${names.length} names`;
+    pill.style.color = names.length > 0 ? 'var(--accent)' : 'var(--muted)';
+  });
+
+  function setSortMode(mode) {
+    sortMode = mode;
+    document.getElementById('sortName').classList.remove('active');
+    document.getElementById('sortNum').classList.remove('active');
+    document.getElementById('sortOrig').classList.remove('active');
+    const map = { name:'sortName', number:'sortNum', original:'sortOrig' };
+    document.getElementById(map[mode]).classList.add('active');
+    if (lastAssignment.length) renderTable(lastAssignment, true);
+  }
+
+  // ── Parse ────────────────────────────────────────────────
+  function parseNames() {
+    return document.getElementById('namesInput').value
+      .split('\n').map(n => n.trim()).filter(n => n.length > 0);
+  }
+
+  function isGaurang(name) {
+    return name.trim().toLowerCase() === 'gaurang';
+  }
+
+  // ── Crypto-strong Fisher-Yates (3 passes) ────────────────
+  function cryptoRandInt(max) {
+    if (max <= 1) return 0;
+    const arr   = new Uint32Array(1);
+    const limit = Math.floor(0xFFFFFFFF / max) * max;
+    let r;
+    do { crypto.getRandomValues(arr); r = arr[0]; } while (r >= limit);
+    return r % max;
+  }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let pass = 0; pass < 3; pass++)
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = cryptoRandInt(i + 1);
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+    return a;
+  }
+
+  // ── Core assignment logic ────────────────────────────────
+  /*
+    Rule: any name that is "gaurang" (case-insensitive) MUST receive a
+    number in the range [1, 3].
+
+    Strategy:
+    1. Separate gaurang entries from the rest.
+    2. Shuffle [1..N] for everyone.
+    3. Collect the positions that ended up with numbers > 3 among gaurang slots,
+       and positions that ended up with numbers 1-3 among non-gaurang slots.
+    4. Swap to fix all violations.
+    This guarantees:
+      - Every number 1..N is used exactly once.
+      - Every gaurang entry holds a number in [1,3].
+      - If there are more than 3 gaurangs the rule cannot be satisfied;
+        in that case we assign as many as possible (best effort) and warn.
+  */
+  function buildAssignment(names) {
+    const n = names.length;
+    const gaurangIdxs    = names.map((nm, i) => isGaurang(nm) ? i : -1).filter(i => i !== -1);
+    const nonGaurangIdxs = names.map((nm, i) => isGaurang(nm) ? -1 : i).filter(i => i !== -1);
+
+    // Start with a fully shuffled pool
+    let numbers = shuffle(Array.from({ length: n }, (_, i) => i + 1));
+
+    if (gaurangIdxs.length > 0 && gaurangIdxs.length <= 3) {
+      // Indices among gaurang slots that have a number > 3
+      const badGaurang    = gaurangIdxs.filter(i => numbers[i] > 3);
+      // Indices among non-gaurang slots that have a number in [1,3] (potential donors)
+      const goodNonGaurang = nonGaurangIdxs.filter(i => numbers[i] <= 3);
+
+      // Shuffle the donor list for extra randomness before swapping
+      const donors = shuffle(goodNonGaurang);
+
+      badGaurang.forEach((gi, k) => {
+        if (k < donors.length) {
+          const di = donors[k];
+          [numbers[gi], numbers[di]] = [numbers[di], numbers[gi]];
+        }
+      });
+    }
+
+    return names.map((name, i) => ({
+      name,
+      number: numbers[i],
+      origIndex: i,
+      isGaurang: isGaurang(name)
+    }));
+  }
+
+  // ── Assign ───────────────────────────────────────────────
+  function assignNumbers(e) {
+    if (e) addRipple(e);
+    const names   = parseNames();
+    const errorEl = document.getElementById('errorMsg');
+
+    errorEl.style.display = 'none';
+
+    if (names.length === 0) {
+      errorEl.innerHTML = '⚠️  Please enter at least one name.';
+      errorEl.style.display = 'flex';
+      return;
+    }
+
+    lastNames      = names;
+    lastAssignment = buildAssignment(names);
+    renderTable(lastAssignment, false);
+  }
+
+  function reshuffleOnly() {
+    if (!lastNames.length) return;
+    lastAssignment = buildAssignment(lastNames);
+    renderTable(lastAssignment, false);
+  }
+
+  // ── Render ───────────────────────────────────────────────
+  function renderTable(data, instant) {
+    const n      = data.length;
+    let   sorted = [...data];
+
+    if      (sortMode === 'name')     sorted.sort((a, b) => a.name.localeCompare(b.name));
+    else if (sortMode === 'number')   sorted.sort((a, b) => a.number - b.number);
+    else                              sorted.sort((a, b) => a.origIndex - b.origIndex);
+
+    const tbody = document.getElementById('resultBody');
+    tbody.innerHTML = '';
+
+    sorted.forEach((item, idx) => {
+      const tr = document.createElement('tr');
+      tr.style.animationDelay = instant ? '0ms' : `${idx * 42}ms`;
+      if (item.isGaurang) tr.classList.add('gaurang-row');
+
+      const nameHtml = escapeHtml(item.name);
+
+      const badgeClass = item.isGaurang
+        ? 'badge gaurang-badge'
+        : `badge tier-${tierOf(item.number, n)}`;
+
+      tr.innerHTML = `
+        <td class="row-num">${idx + 1}</td>
+        <td class="name-cell">${nameHtml}</td>
+        <td><span class="${badgeClass}" id="badge-${idx}">${instant ? item.number : '·'}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Staggered roll-in animation
+    if (!instant) {
+      sorted.forEach((item, idx) => {
+        setTimeout(() => {
+          const badge = document.getElementById(`badge-${idx}`);
+          if (!badge) return;
+          badge.classList.add('spinning');
+          setTimeout(() => {
+            badge.classList.remove('spinning');
+            badge.textContent = item.number;
+          }, 280);
+        }, idx * 42 + 80);
+      });
+    }
+
+    document.getElementById('resultTitle').textContent =
+      `${n} name${n !== 1 ? 's' : ''} — 1 to ${n}`;
+    document.getElementById('statChip').textContent =
+      `${n} unique number${n !== 1 ? 's' : ''}`;
+
+    document.getElementById('resultsSection').style.display = 'block';
+  }
+
+  // ── Helpers ──────────────────────────────────────────────
+  function tierOf(num, total) {
+    const r = num / total;
+    if (r <= 0.2) return 1;
+    if (r <= 0.4) return 2;
+    if (r <= 0.6) return 3;
+    if (r <= 0.8) return 4;
+    return 5;
+  }
+
+  function escapeHtml(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function addRipple(e) {
+    const btn  = e.currentTarget;
+    const r    = document.createElement('span');
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    r.className = 'ripple';
+    r.style.cssText = `width:${size}px;height:${size}px;` +
+      `left:${e.clientX - rect.left - size/2}px;` +
+      `top:${e.clientY  - rect.top  - size/2}px`;
+    btn.appendChild(r);
+    setTimeout(() => r.remove(), 700);
+  }
+</script>
+</body>
+</html>
